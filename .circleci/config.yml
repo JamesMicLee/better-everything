@@ -1,3 +1,4 @@
+---
 version: 2.1
 
 orbs:
@@ -15,6 +16,9 @@ jobs:
       - run: sudo pip install flake8
       - run: flake8 --benchmark --count --show-source --statistics
       - run: ./bash/test/json_test.bash
+      # yamllint disable-line rule:line-length
+      - run: sudo pip install --upgrade yamllint --no-cache-dir --disable-pip-version-check
+      - run: ./bash/test/yaml_test.bash
 
 workflows:
   main:
