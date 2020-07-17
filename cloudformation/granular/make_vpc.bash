@@ -25,3 +25,21 @@ THEVPC=`aws cloudformation describe-stack-resources --stack-name ${1:-TestStack}
        | jq .[][][]  \
        | grep vpc`
 echo $THEVPC
+
+#Grab the identity of the ACL
+THEACL=`aws cloudformation describe-stack-resources --stack-name ${1:-TestStack} --region eu-west-2 \
+       | jq .[][][] \
+       | grep acl`
+echo $THEACL
+
+#create acl entries
+aws cloudformation create-stack  \
+  --template-body file://./vpc_acls.json  \
+  --stack-name ${1:-TestStack}Acls  \
+  --parameters  \
+    ParameterKey=myVpcName,ParameterValue=${THEVPC}  \
+    ParameterKey=myNetworkAcl,ParameterValue=${THEACL}  \
+  --region eu-west-2
+aws cloudformation wait stack-create-complete --stack-name ${1:-TestStack}Acls --region eu-west-2
+
+
