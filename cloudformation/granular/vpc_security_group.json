@@ -1,6 +1,6 @@
 {
   "AWSTemplateFormatVersion": "2010-09-09",
-  "Description": "Template to create a security group",
+  "Description": "A template to create a security group.",
   "Outputs" : {
     "VPCName" : {
       "Description": "The name of the VPC",

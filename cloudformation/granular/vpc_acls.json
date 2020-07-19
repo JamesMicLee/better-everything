@@ -1,6 +1,6 @@
 {
   "AWSTemplateFormatVersion": "2010-09-09",
-  "Description": "A template to add ACLs",
+  "Description": "A template to add ACL Entries.",
   "Outputs" : {
     "VPCName" : {
       "Description": "The name of the VPC",
