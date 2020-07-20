@@ -83,4 +83,20 @@ aws cloudformation create-stack  \
   --parameters  \
     ParameterKey=mySecurityGroup,ParameterValue=${THESG}  \
   --region eu-west-2
+aws cloudformation describe-stacks --region eu-west-2 | jq .[][] | egrep "StackStatus|StackName\":"
 aws cloudformation wait stack-create-complete --stack-name ${1:-TestStack}SecurityGroupRules --region eu-west-2
+
+#create and attach an internet gateway
+aws cloudformation create-stack  \
+  --template-body file://./vpc_igw.json  \
+  --stack-name ${1:-TestStack}Igw  \
+  --parameters ParameterKey=myVpcName,ParameterValue=${THEVPC}  \
+  --region eu-west-2
+aws cloudformation describe-stacks --region eu-west-2 | jq .[][] | egrep "StackStatus|StackName\":"
+aws cloudformation wait stack-create-complete --stack-name ${1:-TestStack}Igw --region eu-west-2
+
+#Grab the internet gateway for making a route
+THEIG=`aws cloudformation describe-stacks --stack-name ${1:-TestStack}Igw --region eu-west-2  \
+       | jq .[][].'Outputs'[].'OutputValue'  `
+echo $THEIG
+

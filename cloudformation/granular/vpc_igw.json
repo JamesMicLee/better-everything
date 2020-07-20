@@ -1,0 +1,40 @@
+{
+ "AWSTemplateFormatVersion": "2010-09-09",
+ "Description": "A template to add an internet gateway.",
+  "Outputs" : {
+    "IgwName" : {
+      "Description": "The name of the Igw",
+      "Value" : { "Ref" : "myInternetGateway" }
+      }
+  },
+  "Parameters" : {
+    "myVpcName" : {
+      "Description" : "The VPC to use",
+      "Type" : "List<AWS::EC2::VPC::Id>"
+    }
+  },
+  "Resources": {
+    "myInternetGateway": {
+      "Type": "AWS::EC2::InternetGateway",
+      "Properties": {
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "myVPCTag"
+          }
+        ]
+      }
+    },
+    "gw2": {
+      "Type": "AWS::EC2::VPCGatewayAttachment",
+      "Properties": {
+        "VpcId": {
+          "Fn::Select": [ "0", {"Ref": "myVpcName"} ] 
+        },
+        "InternetGatewayId": {
+          "Ref": "myInternetGateway"
+        }
+      }
+    }
+  }
+}
