@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash 
 
 #Make sure jq is installed
 set +e
@@ -20,27 +20,24 @@ aws cloudformation describe-stacks --region eu-west-2 | jq .[][] | egrep "StackS
 aws cloudformation wait stack-create-complete --stack-name ${1:-TestStack} --region eu-west-2
 
 #Grab the identity of the VPC
-THEVPC=`aws cloudformation describe-stack-resources --stack-name ${1:-TestStack} --region eu-west-2 \
-       | jq .[][][]  \
-       | grep vpc`
+JSON_PAY=`aws cloudformation describe-stack-resources --stack-name ${1:-TestStack} --region eu-west-2  `
+THEVPC=`echo $JSON_PAY  \
+       | jq --sort-keys '.[][]|select(.ResourceType == "AWS::EC2::VPC")|.PhysicalResourceId'  `
 echo $THEVPC
 
 #Grab the dhcp
-THEDHC=`aws cloudformation describe-stack-resources --stack-name ${1:-TestStack} --region eu-west-2 \
-       | jq .[][]  \
-       | grep '"PhysicalResourceId": "dopt'`
+THEDHC=`echo $JSON_PAY  \
+       | jq --sort-keys '.[][]|select(.ResourceType == "AWS::EC2::DHCPOptions")|.PhysicalResourceId'  `
 echo $THEDHC
 
-#Grab the route
-THEROU=`aws cloudformation describe-stack-resources --stack-name ${1:-TestStack} --region eu-west-2 \
-       | jq .[][][]  \
-       | grep rtb`
-echo $THEROU
+#Grab the route table
+JSON_PAY=`aws ec2 describe-route-tables --region eu-west-2  `
+THERTB=`echo $JSON_PAY | jq --sort-keys '.[][]|select(.VpcId == '${THEVPC}')|.RouteTableId'  `
 
 #Grab the identity of the ACL
-THEACL=`aws cloudformation describe-stack-resources --stack-name ${1:-TestStack} --region eu-west-2 \
-       | jq .[][][] \
-       | grep acl`
+JSON_PAY=`aws ec2 describe-network-acls --region eu-west-2`
+THEACL=`echo $JSON_PAY  \
+      | jq --sort-keys '.[][]|select(.VpcId == '$THEVPC')|.NetworkAclId'  `
 echo $THEACL
 
 #create acl entries
@@ -95,8 +92,25 @@ aws cloudformation create-stack  \
 aws cloudformation describe-stacks --region eu-west-2 | jq .[][] | egrep "StackStatus|StackName\":"
 aws cloudformation wait stack-create-complete --stack-name ${1:-TestStack}Igw --region eu-west-2
 
-#Grab the internet gateway for making a route
-THEIG=`aws cloudformation describe-stacks --stack-name ${1:-TestStack}Igw --region eu-west-2  \
-       | jq .[][].'Outputs'[].'OutputValue'  `
-echo $THEIG
+#create and attach subnets
+aws cloudformation create-stack  \
+  --template-body file://./vpc_subnets.json  \
+  --stack-name ${1:-TestStack}Subnets  \
+  --parameters  \
+    ParameterKey=myVpcName,ParameterValue=${THEVPC}  \
+    ParameterKey=myNetworkAcl,ParameterValue=${THEACL}  \
+  --region eu-west-2
+aws cloudformation describe-stacks --region eu-west-2 | jq .[][] | egrep "StackStatus|StackName\":"
+aws cloudformation wait stack-create-complete --stack-name ${1:-TestStack}Subnets --region eu-west-2
+
+# list the subnets for a flare
+aws cloudformation describe-stacks  \
+  --stack-name ${1:-TestStack}Subnets  \
+  --region eu-west-2  \
+  | jq .[][].'Outputs'[]  \
+  | jq '.OutputKey,.OutputValue'  \
+  | egrep -i subnet
+echo
+
+
 

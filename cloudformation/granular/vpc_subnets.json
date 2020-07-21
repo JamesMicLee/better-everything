@@ -1,0 +1,208 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "A template to add subnets.",
+  "Outputs" : {
+    "VPCName" : {
+      "Description": "The name of the VPC",
+      "Value" : { "Ref" : "myVpcName" }
+    },
+    "Subnet1Lambda" : {
+      "Description": "The name of a subnet",
+      "Value" : { "Ref" : "mySubnetlaa" }
+    },
+    "Subnet2Lambda" : {
+      "Description": "The name of a subnet",
+      "Value" : { "Ref" : "mySubnetlab" }
+    },
+    "Subnet3Lambda" : {
+      "Description": "The name of a subnet",
+      "Value" : { "Ref" : "mySubnetlac" }
+    },
+    "Subnet4Ec2" : {
+      "Description": "The name of a subnet",
+      "Value" : { "Ref" : "mySubnetec2a" }
+    },
+    "Subnet5Ec2" : {
+      "Description": "The name of a subnet",
+      "Value" : { "Ref" : "mySubnetec2b" }
+    },
+    "Subnet6Ec2" : {
+      "Description": "The name of a subnet",
+      "Value" : { "Ref" : "mySubnetec2c" }
+    }
+  },
+  "Parameters" : {
+    "myVpcName" : {
+      "Description" : "The VPC to use",
+      "Type" : "String"
+    },
+    "myNetworkAcl" : {
+      "Description" : "The ACL to use",
+      "Type": "String"
+    }
+  },
+  "Resources": {
+    "mySubnetlab": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "CidrBlock": "10.0.8.0/22",
+        "AvailabilityZone": "eu-west-2b",
+        "VpcId": {
+          "Ref": "myVpcName"
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "myVPCTag"
+          }
+        ]
+      }
+    },
+    "mySubnetec2c": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "CidrBlock": "10.0.0.32/28",
+        "AvailabilityZone": "eu-west-2c",
+        "VpcId": {
+          "Ref": "myVpcName"
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "myVPCTag"
+          }
+        ]
+      }
+    },
+    "mySubnetlac": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "CidrBlock": "10.0.12.0/22",
+        "AvailabilityZone": "eu-west-2c",
+        "VpcId": {
+          "Ref": "myVpcName"
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "myVPCTag"
+          }
+        ]
+      }
+    },
+    "mySubnetec2a": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "CidrBlock": "10.0.0.0/28",
+        "AvailabilityZone": "eu-west-2a",
+        "VpcId": {
+          "Ref": "myVpcName"
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "myVPCTag"
+          }
+        ]
+      }
+    },
+    "mySubnetlaa": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "CidrBlock": "10.0.4.0/22",
+        "AvailabilityZone": "eu-west-2a",
+        "VpcId": {
+          "Ref": "myVpcName"
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "myVPCTag"
+          }
+        ]
+      }
+    },
+    "mySubnetec2b": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "CidrBlock": "10.0.0.16/28",
+        "AvailabilityZone": "eu-west-2b",
+        "VpcId": {
+          "Ref": "myVpcName"
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "myVPCTag"
+          }
+        ]
+      }
+    },
+    "mySubnetacl7": {
+      "Type": "AWS::EC2::SubnetNetworkAclAssociation",
+      "Properties": {
+        "NetworkAclId": {
+          "Ref": "myNetworkAcl"
+        },
+        "SubnetId": {
+          "Ref": "mySubnetec2c"
+        }
+      }
+    },
+    "mySubnetacl8": {
+      "Type": "AWS::EC2::SubnetNetworkAclAssociation",
+      "Properties": {
+        "NetworkAclId": {
+          "Ref": "myNetworkAcl"
+        },
+        "SubnetId": {
+          "Ref": "mySubnetlab"
+        }
+      }
+    },
+    "mySubnetacl9": {
+      "Type": "AWS::EC2::SubnetNetworkAclAssociation",
+      "Properties": {
+        "NetworkAclId": {
+          "Ref": "myNetworkAcl"
+        },
+        "SubnetId": {
+          "Ref": "mySubnetlaa"
+        }
+      }
+    },
+    "mySubnetacl10": {
+      "Type": "AWS::EC2::SubnetNetworkAclAssociation",
+      "Properties": {
+        "NetworkAclId": {
+          "Ref": "myNetworkAcl"
+        },
+        "SubnetId": {
+          "Ref": "mySubnetec2b"
+        }
+      }
+    },
+    "mySubnetacl11": {
+      "Type": "AWS::EC2::SubnetNetworkAclAssociation",
+      "Properties": {
+        "NetworkAclId": {
+          "Ref": "myNetworkAcl"
+        },
+        "SubnetId": {
+          "Ref": "mySubnetlac"
+        }
+      }
+    },
+    "mySubnetacl12": {
+      "Type": "AWS::EC2::SubnetNetworkAclAssociation",
+      "Properties": {
+        "NetworkAclId": {
+          "Ref": "myNetworkAcl"
+        },
+        "SubnetId": {
+          "Ref": "mySubnetec2a"
+        }
+      }
+    }
+  }
+}

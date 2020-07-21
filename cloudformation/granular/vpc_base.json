@@ -6,14 +6,6 @@
       "Description": "The name of the VPC",
       "Value" : { "Ref" : "myVPCName" }
       },
-    "MyNetworkACL" : {
-      "Description": "The name of the ACL",
-      "Value" : { "Ref" : "myNetworkACL" }
-      },
-    "MyRouteTable" : {
-      "Description": "The name of the Route Table",
-      "Value" : { "Ref" : "myRouteTable" }
-      },
     "StackName" : {
       "Description": "The name of the stack",
       "Value": { "Fn::Sub" : "${AWS::StackName}" }
@@ -42,22 +34,6 @@
         "DomainNameServers": [
           "AmazonProvidedDNS"
         ]
-      }
-    },
-    "myNetworkACL": {
-      "Type": "AWS::EC2::NetworkAcl",
-      "Properties": {
-        "VpcId": {
-          "Ref": "myVPCName"
-        }
-      }
-    },
-    "myRouteTable": {
-      "Type": "AWS::EC2::RouteTable",
-      "Properties": {
-        "VpcId": {
-          "Ref": "myVPCName"
-        }
       }
     }
   }
