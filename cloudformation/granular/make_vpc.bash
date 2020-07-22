@@ -12,7 +12,7 @@ set -e
 describe_stacks()
 {
 aws cloudformation describe-stacks --region eu-west-2  \
-  | jq '.[][]|select(.StackName == ("TestStack", "TestStackAclEntry", "TestStackSecurityGroup", "TestStackSecurityGroupRules", "TestStackIgw", "TestStackSubnets")) |.StackName,.StackStatus'  \
+  | jq '.[][]|select(.StackName == ("TestStack", "TestStackAclEntry", "TestStackSecurityGroup", "TestStackSecurityGroupRules", "TestStackIgw", "TestStackSubnets", "TestStackInterfaces")) |.StackName,.StackStatus'  \
   | paste - -  \
   | awk '{print "\033[1;32m"$2, $1"\033[0m"}'
 }
@@ -120,5 +120,30 @@ aws cloudformation describe-stacks  \
   | egrep -i subnet
 echo
 
+#Grab the identity of the Security Group
+JSON_PAY=`aws ec2 describe-security-groups --region eu-west-2  `
+THESG=`echo $JSON_PAY | jq --sort-keys '.[][]|select(.VpcId == '${THEVPC}')|.GroupId,.GroupName' | paste - -| grep -v '"default"'\$ | awk '{ print $1 } '  `
+echo $THESG
 
+SUBNET=\"${2:-Subnet4Ec2}\"
+THESUB=`aws cloudformation describe-stacks  \
+  --stack-name ${1:-TestStack}Subnets  \
+  --region eu-west-2  \
+  | jq --sort-keys '.[][].Outputs[]|select(.OutputKey == '${SUBNET}')' \
+  | jq '.OutputValue'  `
+echo $THESUB
+
+#create network interfaces
+aws cloudformation create-stack  \
+  --template-body file://./vpc_interfaces.json  \
+  --stack-name ${1:-TestStack}Interfaces  \
+  --parameters  \
+    ParameterKey=mySecurityGroup,ParameterValue=${THESG}  \
+    ParameterKey=mySubnet,ParameterValue=${THESUB}  \
+  --region eu-west-2
+describe_stacks
+aws cloudformation wait stack-create-complete --stack-name ${1:-TestStack}Interfaces --region eu-west-2
+
+echo
+describe_stacks
 
