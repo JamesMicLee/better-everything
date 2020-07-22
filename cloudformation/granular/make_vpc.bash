@@ -12,7 +12,7 @@ set -e
 describe_stacks()
 {
 aws cloudformation describe-stacks --region eu-west-2  \
-  | jq '.[][]|select(.StackName == ("TestStack", "TestStackAclEntry", "TestStackSecurityGroup", "TestStackSecurityGroupRules", "TestStackIgw", "TestStackSubnets", "TestStackInterfaces")) |.StackName,.StackStatus'  \
+  | jq '.[][]|select(.StackName == ("TestStack", "TestStackAclEntry", "TestStackSecurityGroup", "TestStackSecurityGroupRules", "TestStackIgw", "TestStackSubnets", "TestStackInterfaces", "TestStackDefaultRoute")) |.StackName,.StackStatus'  \
   | paste - -  \
   | awk '{print "\033[1;32m"$2, $1"\033[0m"}'
 }
@@ -40,7 +40,8 @@ echo $THEDHC
 
 #Grab the route table
 JSON_PAY=`aws ec2 describe-route-tables --region eu-west-2  `
-THERTB=`echo $JSON_PAY | jq --sort-keys '.[][]|select(.VpcId == '${THEVPC}')|.RouteTableId'  `
+THERT=`echo $JSON_PAY | jq --sort-keys '.[][]|select(.VpcId == '${THEVPC}').RouteTableId'  `
+echo $THERT
 
 #Grab the identity of the ACL
 JSON_PAY=`aws ec2 describe-network-acls --region eu-west-2`
@@ -100,6 +101,24 @@ aws cloudformation create-stack  \
 describe_stacks
 aws cloudformation wait stack-create-complete --stack-name ${1:-TestStack}Igw --region eu-west-2
 
+#Grab the gateway
+JSON_PAY=`aws ec2 describe-internet-gateways --region eu-west-2  `
+THEIG=`echo $JSON_PAY | jq --sort-keys '.[][]|select(.Attachments|.[].VpcId == '${THEVPC}').InternetGatewayId'  `
+echo $THEIG
+
+#create routes
+aws cloudformation create-stack  \
+  --template-body file://./vpc_routes.json  \
+  --stack-name ${1:-TestStack}DefaultRoute  \
+  --parameters  \
+    ParameterKey=myVpcName,ParameterValue=${THEVPC}  \
+    ParameterKey=myInternetGateway,ParameterValue=${THEIG}  \
+    ParameterKey=myRouteTable,ParameterValue=${THERT}  \
+  --region eu-west-2
+
+echo
+describe_stacks
+
 #create and attach subnets
 aws cloudformation create-stack  \
   --template-body file://./vpc_subnets.json  \
@@ -146,4 +165,3 @@ aws cloudformation wait stack-create-complete --stack-name ${1:-TestStack}Interf
 
 echo
 describe_stacks
-
