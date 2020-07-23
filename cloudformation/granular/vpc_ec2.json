@@ -1,0 +1,72 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "A template to add an ec2 to a vpc.",
+  "Outputs": {
+    "SubnetId": {
+      "Description": "The subnet in the VPC.",
+      "Value": {
+        "Ref": "mySubnet"
+      }
+    }
+  },
+  "Parameters": {
+    "myAmi": {
+      "Description": "The AMI to use.",
+      "Type": "String"
+    },
+    "mySecurityGroup": {
+      "Description": "The security group to use.",
+      "Type": "String"
+    },
+    "mySubnet": {
+      "Description": "The subnet to use.",
+      "Type": "String"
+    }
+  },
+  "Resources": {
+    "EC2Instance": {
+      "Properties": {
+        "BlockDeviceMappings": [
+          {
+            "DeviceName": "/dev/xvda",
+            "Ebs": {
+              "VolumeSize": "8",
+              "VolumeType": "gp2"
+            }
+          }
+        ],
+        "DisableApiTermination": "false",
+        "ImageId": {
+          "Ref": "myAmi"
+        },
+        "InstanceInitiatedShutdownBehavior": "stop",
+        "InstanceType": "t2.micro",
+        "KeyName": "key_pair_name_here",
+        "Monitoring": "false",
+        "NetworkInterfaces": [
+          {
+            "AssociatePublicIpAddress": "true",
+            "DeleteOnTermination": "true",
+            "Description": "Primary network interface",
+            "DeviceIndex": 0,
+            "GroupSet": [
+              {
+                "Ref": "mySecurityGroup"
+              }
+            ],
+            "SubnetId": {
+              "Ref": "mySubnet"
+            }
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "AUTOEC2"
+          }
+        ]
+      },
+      "Type": "AWS::EC2::Instance"
+    }
+  }
+}
