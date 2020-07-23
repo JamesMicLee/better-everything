@@ -1,35 +1,40 @@
 {
   "AWSTemplateFormatVersion": "2010-09-09",
   "Description": "A template that adds a default route.",
-  "Outputs" : {
-    "VPCName" : {
+  "Outputs": {
+    "VPCName": {
       "Description": "The name of the VPC",
-      "Value" : { "Ref" : "myVpcName" }
+      "Value": {
+        "Ref": "myVpcName"
       }
+    }
   },
-  "Parameters" : {
-    "myVpcName" : {
-      "Description" : "The VPC to use",
-      "Type" : "String"
+  "Parameters": {
+    "myInternetGateway": {
+      "Description": "The gateway to use",
+      "Type": "String"
     },
-    "myRouteTable" : {
-      "Description" : "The route table to use",
-      "Type" : "String"
+    "myRouteTable": {
+      "Description": "The route table to use",
+      "Type": "String"
     },
-    "myInternetGateway" : {
-      "Description" : "The gateway to use",
-      "Type" : "String"
+    "myVpcName": {
+      "Description": "The VPC to use",
+      "Type": "String"
     }
   },
   "Resources": {
     "myRoute": {
-      "Type": "AWS::EC2::Route",
       "Properties": {
         "DestinationCidrBlock": "0.0.0.0/0",
-        "RouteTableId": { "Ref": "myRouteTable" },
-        "GatewayId": { "Ref": "myInternetGateway" }
-      }
+        "GatewayId": {
+          "Ref": "myInternetGateway"
+        },
+        "RouteTableId": {
+          "Ref": "myRouteTable"
+        }
+      },
+      "Type": "AWS::EC2::Route"
     }
   }
 }
-

@@ -1,21 +1,32 @@
 {
   "AWSTemplateFormatVersion": "2010-09-09",
   "Description": "A template to add security group rules.",
-  "Outputs" : {
-    "SecurityGroup" : {
+  "Outputs": {
+    "SecurityGroup": {
       "Description": "The name of a security group of the VPC",
-      "Value" : { "Ref" : "mySecurityGroup" }
+      "Value": {
+        "Ref": "mySecurityGroup"
       }
+    }
   },
-  "Parameters" : {
-    "mySecurityGroup" : {
-      "Description" : "The Security Group to use",
-      "Type" : "String"
+  "Parameters": {
+    "mySecurityGroup": {
+      "Description": "The Security Group to use",
+      "Type": "String"
     }
   },
   "Resources": {
+    "egress2": {
+      "Properties": {
+        "CidrIp": "0.0.0.0/0",
+        "GroupId": {
+          "Ref": "mySecurityGroup"
+        },
+        "IpProtocol": "-1"
+      },
+      "Type": "AWS::EC2::SecurityGroupEgress"
+    },
     "ingress3": {
-      "Type": "AWS::EC2::SecurityGroupIngress",
       "Properties": {
         "GroupId": {
           "Ref": "mySecurityGroup"
@@ -24,29 +35,20 @@
         "SourceSecurityGroupId": {
           "Ref": "mySecurityGroup"
         }
-      }
+      },
+      "Type": "AWS::EC2::SecurityGroupIngress"
     },
     "ingress4": {
-      "Type": "AWS::EC2::SecurityGroupIngress",
       "Properties": {
+        "CidrIp": "0.0.0.0/0",
+        "FromPort": "22",
         "GroupId": {
           "Ref": "mySecurityGroup"
         },
         "IpProtocol": "tcp",
-        "FromPort": "22",
-        "ToPort": "22",
-        "CidrIp": "0.0.0.0/0"
-      }
-    },
-    "egress2": {
-      "Type": "AWS::EC2::SecurityGroupEgress",
-      "Properties": {
-        "GroupId": {
-          "Ref": "mySecurityGroup"
-        },
-        "IpProtocol": "-1",
-        "CidrIp": "0.0.0.0/0"
-      }
+        "ToPort": "22"
+      },
+      "Type": "AWS::EC2::SecurityGroupIngress"
     }
   }
 }

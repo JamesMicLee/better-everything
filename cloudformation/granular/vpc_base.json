@@ -1,40 +1,44 @@
 {
   "AWSTemplateFormatVersion": "2010-09-09",
   "Description": "A template to build a VPC.",
-  "Outputs" : {
-    "VPCName" : {
-      "Description": "The name of the VPC",
-      "Value" : { "Ref" : "myVPCName" }
-      },
-    "StackName" : {
+  "Outputs": {
+    "StackName": {
       "Description": "The name of the stack",
-      "Value": { "Fn::Sub" : "${AWS::StackName}" }
+      "Value": {
+        "Fn::Sub": "${AWS::StackName}"
+      }
+    },
+    "VPCName": {
+      "Description": "The name of the VPC",
+      "Value": {
+        "Ref": "myVPCName"
+      }
     }
   },
   "Resources": {
+    "myDHCPOptions": {
+      "Properties": {
+        "DomainName": "eu-west-2.compute.internal",
+        "DomainNameServers": [
+          "AmazonProvidedDNS"
+        ]
+      },
+      "Type": "AWS::EC2::DHCPOptions"
+    },
     "myVPCName": {
-      "Type": "AWS::EC2::VPC",
       "Properties": {
         "CidrBlock": "10.0.0.0/16",
-        "InstanceTenancy": "default",
-        "EnableDnsSupport": "true",
         "EnableDnsHostnames": "true",
+        "EnableDnsSupport": "true",
+        "InstanceTenancy": "default",
         "Tags": [
           {
             "Key": "Name",
             "Value": "myVPC"
           }
         ]
-      }
-    },
-    "myDHCPOptions": {
-      "Type": "AWS::EC2::DHCPOptions",
-      "Properties": {
-        "DomainName": "eu-west-2.compute.internal",
-        "DomainNameServers": [
-          "AmazonProvidedDNS"
-        ]
-      }
+      },
+      "Type": "AWS::EC2::VPC"
     }
   }
 }

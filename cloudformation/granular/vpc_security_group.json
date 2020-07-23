@@ -1,31 +1,35 @@
 {
   "AWSTemplateFormatVersion": "2010-09-09",
   "Description": "A template to create a security group.",
-  "Outputs" : {
-    "VPCName" : {
-      "Description": "The name of the VPC",
-      "Value" : { "Ref" : "myVpcName" }
-      },
-    "SecurityGroup" : {
+  "Outputs": {
+    "SecurityGroup": {
       "Description": "The name of the Security Group",
-      "Value" : { "Ref" : "mySecurityGroup" }
+      "Value": {
+        "Ref": "mySecurityGroup"
       }
+    },
+    "VPCName": {
+      "Description": "The name of the VPC",
+      "Value": {
+        "Ref": "myVpcName"
+      }
+    }
   },
-  "Parameters" : {
-    "myVpcName" : {
-      "Description" : "The VPC to use",
-      "Type" : "String"
+  "Parameters": {
+    "myVpcName": {
+      "Description": "The VPC to use",
+      "Type": "String"
     }
   },
   "Resources": {
     "mySecurityGroup": {
-      "Type": "AWS::EC2::SecurityGroup",
       "Properties": {
         "GroupDescription": "a security group for myVPCName",
         "VpcId": {
           "Ref": "myVpcName"
         }
-      }
+      },
+      "Type": "AWS::EC2::SecurityGroup"
     }
   }
 }

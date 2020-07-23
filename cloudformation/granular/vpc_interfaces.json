@@ -1,32 +1,45 @@
 {
   "AWSTemplateFormatVersion": "2010-09-09",
   "Description": "A template to add a network interface to a security group.",
-  "Outputs" : {
-    "SubnetId" : {
+  "Outputs": {
+    "SubnetId": {
       "Description": "The subnet in the VPC",
-      "Value" : { "Ref" : "mySubnet" }
+      "Value": {
+        "Ref": "mySubnet"
       }
+    }
   },
-  "Parameters" : {
-    "mySubnet" : {
-      "Description" : "The subnet to use",
-      "Type" : "String"
+  "Parameters": {
+    "mySecurityGroup": {
+      "Description": "The Security Group to use",
+      "Type": "String"
     },
-    "mySecurityGroup" : {
-      "Description" : "The Security Group to use",
-      "Type" : "String"
+    "mySubnet": {
+      "Description": "The subnet to use",
+      "Type": "String"
     }
   },
   "Resources": {
-    "controlXface" : {
-      "Type" : "AWS::EC2::NetworkInterface",
-      "Properties" : {
-        "SubnetId" : { "Ref" : "mySubnet" },
-        "Description" :"Interface for control traffic such as SSH",
-        "GroupSet" : [ {"Ref" : "mySecurityGroup"} ],
-        "SourceDestCheck" : "true",
-        "Tags" : [ {"Key" : "Network", "Value" : "Control"}]
-      }
+    "controlXface": {
+      "Properties": {
+        "Description": "Interface for control traffic such as SSH",
+        "GroupSet": [
+          {
+            "Ref": "mySecurityGroup"
+          }
+        ],
+        "SourceDestCheck": "true",
+        "SubnetId": {
+          "Ref": "mySubnet"
+        },
+        "Tags": [
+          {
+            "Key": "Network",
+            "Value": "Control"
+          }
+        ]
+      },
+      "Type": "AWS::EC2::NetworkInterface"
     }
   }
 }
