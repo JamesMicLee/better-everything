@@ -6,8 +6,9 @@ set +e
 set -e
 /usr/bin/rpm -q jq
 
-#Set an alias for aws.
+#Set an alias for aws and jq.
 /usr/bin/alias aws='/usr/bin/aws'
+/usr/bin/alias jq='/usr/bin/jq'
 
 describe_stacks()
 {
@@ -40,8 +41,8 @@ echo $THEDHC
 
 #Grab the route table
 JSON_PAY=`aws ec2 describe-route-tables --region eu-west-2  `
-THERT=`echo $JSON_PAY | jq --sort-keys '.[][]|select(.VpcId == '${THEVPC}').RouteTableId'  `
-echo $THERT
+THERTB=`echo $JSON_PAY | jq --sort-keys '.[][]|select(.VpcId == '${THEVPC}').RouteTableId'  `
+echo $THERTB
 
 #Grab the identity of the ACL
 JSON_PAY=`aws ec2 describe-network-acls --region eu-west-2`
@@ -77,17 +78,17 @@ describe_stacks
 aws cloudformation wait stack-create-complete --stack-name ${1:-TestStack}SecurityGroup --region eu-west-2
 
 #Grab the identity of the Security Group
-THESG=`aws cloudformation describe-stack-resources --stack-name ${1:-TestStack}SecurityGroup --region eu-west-2 \
+THESGR=`aws cloudformation describe-stack-resources --stack-name ${1:-TestStack}SecurityGroup --region eu-west-2 \
        | jq .[][][] \
        | grep sg`
-echo $THESG
+echo $THESGR
 
 #create security group rules
 aws cloudformation create-stack  \
   --template-body file://./vpc_gress.json  \
   --stack-name ${1:-TestStack}SecurityGroupRules  \
   --parameters  \
-    ParameterKey=mySecurityGroup,ParameterValue=${THESG}  \
+    ParameterKey=mySecurityGroup,ParameterValue=${THESGR}  \
   --region eu-west-2
 describe_stacks
 aws cloudformation wait stack-create-complete --stack-name ${1:-TestStack}SecurityGroupRules --region eu-west-2
@@ -103,8 +104,8 @@ aws cloudformation wait stack-create-complete --stack-name ${1:-TestStack}Igw --
 
 #Grab the gateway
 JSON_PAY=`aws ec2 describe-internet-gateways --region eu-west-2  `
-THEIG=`echo $JSON_PAY | jq --sort-keys '.[][]|select(.Attachments|.[].VpcId == '${THEVPC}').InternetGatewayId'  `
-echo $THEIG
+THEIGW=`echo $JSON_PAY | jq --sort-keys '.[][]|select(.Attachments|.[].VpcId == '${THEVPC}').InternetGatewayId'  `
+echo $THEIGW
 
 #create routes
 aws cloudformation create-stack  \
@@ -112,8 +113,8 @@ aws cloudformation create-stack  \
   --stack-name ${1:-TestStack}DefaultRoute  \
   --parameters  \
     ParameterKey=myVpcName,ParameterValue=${THEVPC}  \
-    ParameterKey=myInternetGateway,ParameterValue=${THEIG}  \
-    ParameterKey=myRouteTable,ParameterValue=${THERT}  \
+    ParameterKey=myInternetGateway,ParameterValue=${THEIGW}  \
+    ParameterKey=myRouteTable,ParameterValue=${THERTB}  \
   --region eu-west-2
 
 echo
@@ -141,8 +142,8 @@ echo
 
 #Grab the identity of the Security Group
 JSON_PAY=`aws ec2 describe-security-groups --region eu-west-2  `
-THESG=`echo $JSON_PAY | jq --sort-keys '.[][]|select(.VpcId == '${THEVPC}')|.GroupId,.GroupName' | paste - -| grep -v '"default"'\$ | awk '{ print $1 } '  `
-echo $THESG
+THESGR=`echo $JSON_PAY | jq --sort-keys '.[][]|select(.VpcId == '${THEVPC}')|.GroupId,.GroupName' | paste - -| grep -v '"default"'\$ | awk '{ print $1 } '  `
+echo $THESGR
 
 SUBNET=\"${2:-Subnet4Ec2}\"
 THESUB=`aws cloudformation describe-stacks  \
@@ -157,7 +158,7 @@ aws cloudformation create-stack  \
   --template-body file://./vpc_interfaces.json  \
   --stack-name ${1:-TestStack}Interfaces  \
   --parameters  \
-    ParameterKey=mySecurityGroup,ParameterValue=${THESG}  \
+    ParameterKey=mySecurityGroup,ParameterValue=${THESGR}  \
     ParameterKey=mySubnet,ParameterValue=${THESUB}  \
   --region eu-west-2
 describe_stacks
