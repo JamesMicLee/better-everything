@@ -1,4 +1,7 @@
-#!/bin/bash 
+#!/bin/bash -e
+
+#Import functions and aliases.
+. ./functions.bash
 
 #Make sure jq is installed
 set +e
@@ -6,25 +9,15 @@ set +e
 set -e
 /usr/bin/rpm -q jq
 
-#Set an alias for aws and jq.
-/usr/bin/alias aws='/usr/bin/aws'
-/usr/bin/alias jq='/usr/bin/jq'
-
-describe_stacks()
-{
-aws cloudformation describe-stacks --region eu-west-2  \
-  | jq '.[][]|select(.StackName == ("TestStack", "TestStackAclEntry", "TestStackSecurityGroup", "TestStackSecurityGroupRules", "TestStackIgw", "TestStackSubnets", "TestStackInterfaces", "TestStackDefaultRoute")) |.StackName,.StackStatus'  \
-  | paste - -  \
-  | awk '{print "\033[1;32m"$2, $1"\033[0m"}'
-}
-describe_stacks
+#Run describe_stacks ${1:-TestStack} before we begin.
+describe_stacks ${1:-TestStack}
 
 #Make an empty VPC
 aws cloudformation create-stack  \
   --template-body file://./vpc_base.json  \
   --stack-name ${1:-TestStack}  \
   --region eu-west-2 
-describe_stacks
+describe_stacks ${1:-TestStack}
 #Wait for the vpc to be created
 aws cloudformation wait stack-create-complete --stack-name ${1:-TestStack} --region eu-west-2
 
@@ -58,7 +51,7 @@ aws cloudformation create-stack  \
     ParameterKey=myVpcName,ParameterValue=${THEVPC}  \
     ParameterKey=myNetworkAcl,ParameterValue=${THEACL}  \
   --region eu-west-2
-describe_stacks
+describe_stacks ${1:-TestStack}
 aws cloudformation wait stack-create-complete --stack-name ${1:-TestStack}AclEntry --region eu-west-2
 
 #Grab the ACL Entries
@@ -74,7 +67,7 @@ aws cloudformation create-stack  \
   --parameters  \
     ParameterKey=myVpcName,ParameterValue=${THEVPC}  \
   --region eu-west-2
-describe_stacks
+describe_stacks ${1:-TestStack}
 aws cloudformation wait stack-create-complete --stack-name ${1:-TestStack}SecurityGroup --region eu-west-2
 
 #Grab the identity of the Security Group
@@ -90,7 +83,7 @@ aws cloudformation create-stack  \
   --parameters  \
     ParameterKey=mySecurityGroup,ParameterValue=${THESGR}  \
   --region eu-west-2
-describe_stacks
+describe_stacks ${1:-TestStack}
 aws cloudformation wait stack-create-complete --stack-name ${1:-TestStack}SecurityGroupRules --region eu-west-2
 
 #create and attach an internet gateway
@@ -99,7 +92,7 @@ aws cloudformation create-stack  \
   --stack-name ${1:-TestStack}Igw  \
   --parameters ParameterKey=myVpcName,ParameterValue=${THEVPC}  \
   --region eu-west-2
-describe_stacks
+describe_stacks ${1:-TestStack}
 aws cloudformation wait stack-create-complete --stack-name ${1:-TestStack}Igw --region eu-west-2
 
 #Grab the gateway
@@ -118,7 +111,7 @@ aws cloudformation create-stack  \
   --region eu-west-2
 
 echo
-describe_stacks
+describe_stacks ${1:-TestStack}
 
 #create and attach subnets
 aws cloudformation create-stack  \
@@ -128,7 +121,7 @@ aws cloudformation create-stack  \
     ParameterKey=myVpcName,ParameterValue=${THEVPC}  \
     ParameterKey=myNetworkAcl,ParameterValue=${THEACL}  \
   --region eu-west-2
-describe_stacks
+describe_stacks ${1:-TestStack}
 aws cloudformation wait stack-create-complete --stack-name ${1:-TestStack}Subnets --region eu-west-2
 
 # list the subnets for a flare
@@ -161,8 +154,8 @@ aws cloudformation create-stack  \
     ParameterKey=mySecurityGroup,ParameterValue=${THESGR}  \
     ParameterKey=mySubnet,ParameterValue=${THESUB}  \
   --region eu-west-2
-describe_stacks
+describe_stacks ${1:-TestStack}
 aws cloudformation wait stack-create-complete --stack-name ${1:-TestStack}Interfaces --region eu-west-2
 
 echo
-describe_stacks
+describe_stacks ${1:-TestStack}
