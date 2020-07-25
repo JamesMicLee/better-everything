@@ -1,4 +1,7 @@
-#!/bin/bash 
+#!/bin/bash -e
+
+#Import functions and aliases.
+. ./functions.bash
 
 #Make sure jq is installed
 set +e
@@ -6,17 +9,8 @@ set +e
 set -e
 /usr/bin/rpm -q jq
 
-#Set an alias for aws.
-/usr/bin/alias aws='/usr/bin/aws'
-
-describe_stacks()
-{
-aws cloudformation describe-stacks --region eu-west-2  \
-  | jq '.[][]|select(.StackName == ("TestStack", "TestStackAclEntry", "TestStackSecurityGroup", "TestStackSecurityGroupRules", "TestStackIgw", "TestStackSubnets", "TestStackInterfaces", "TestStackDefaultRoute", "TestStackEc2")) |.StackName,.StackStatus'  \
-  | paste - -  \
-  | awk '{print "\033[1;32m"$2, $1"\033[0m"}'
-}
-describe_stacks
+#Run describe_stacks ${1:-TestStack} before we begin.
+describe_stacks ${1:-TestStack}
 
 #Grab the identity of the VPC
 JSON_PAY=`aws cloudformation describe-stack-resources --stack-name ${1:-TestStack} --region eu-west-2  `
@@ -57,9 +51,9 @@ aws cloudformation create-stack  \
     ParameterKey=myAmi,ParameterValue=${THEAMI}  \
     ParameterKey=mySecurityGroup,ParameterValue=${THESG}  \
   --region eu-west-2  
-describe_stacks
+describe_stacks ${1:-TestStack}
 aws cloudformation wait stack-create-complete --stack-name ${1:-TestStack}Ec2 --region eu-west-2
 
 echo
-describe_stacks
+describe_stacks ${1:-TestStack}
 
