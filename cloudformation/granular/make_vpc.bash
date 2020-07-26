@@ -52,13 +52,6 @@ aws cloudformation create-stack  \
     ParameterKey=myNetworkAcl,ParameterValue=${THEACL}  \
   --region eu-west-2
 describe_stacks ${1:-TestStack}
-aws cloudformation wait stack-create-complete --stack-name ${1:-TestStack}AclEntry --region eu-west-2
-
-#Grab the ACL Entries
-THEACE=`aws cloudformation describe-stack-resources --stack-name ${1:-TestStack}AclEntry --region eu-west-2 \
-       | jq .[][][] \
-       | grep acl`
-echo $THEACE
 
 #create a security group
 aws cloudformation create-stack  \
@@ -68,23 +61,6 @@ aws cloudformation create-stack  \
     ParameterKey=myVpcName,ParameterValue=${THEVPC}  \
   --region eu-west-2
 describe_stacks ${1:-TestStack}
-aws cloudformation wait stack-create-complete --stack-name ${1:-TestStack}SecurityGroup --region eu-west-2
-
-#Grab the identity of the Security Group
-THESGR=`aws cloudformation describe-stack-resources --stack-name ${1:-TestStack}SecurityGroup --region eu-west-2 \
-       | jq .[][][] \
-       | grep sg`
-echo $THESGR
-
-#create security group rules
-aws cloudformation create-stack  \
-  --template-body file://./vpc_gress.json  \
-  --stack-name ${1:-TestStack}SecurityGroupRules  \
-  --parameters  \
-    ParameterKey=mySecurityGroup,ParameterValue=${THESGR}  \
-  --region eu-west-2
-describe_stacks ${1:-TestStack}
-aws cloudformation wait stack-create-complete --stack-name ${1:-TestStack}SecurityGroupRules --region eu-west-2
 
 #create and attach an internet gateway
 aws cloudformation create-stack  \
@@ -93,12 +69,27 @@ aws cloudformation create-stack  \
   --parameters ParameterKey=myVpcName,ParameterValue=${THEVPC}  \
   --region eu-west-2
 describe_stacks ${1:-TestStack}
+
+aws cloudformation wait stack-create-complete --stack-name ${1:-TestStack}AclEntry --region eu-west-2
+aws cloudformation wait stack-create-complete --stack-name ${1:-TestStack}SecurityGroup --region eu-west-2
 aws cloudformation wait stack-create-complete --stack-name ${1:-TestStack}Igw --region eu-west-2
 
 #Grab the gateway
 JSON_PAY=`aws ec2 describe-internet-gateways --region eu-west-2  `
 THEIGW=`echo $JSON_PAY | jq --sort-keys '.[][]|select(.Attachments|.[].VpcId == '${THEVPC}').InternetGatewayId'  `
 echo $THEIGW
+
+#Grab the ACL Entries
+THEACE=`aws cloudformation describe-stack-resources --stack-name ${1:-TestStack}AclEntry --region eu-west-2 \
+       | jq .[][][] \
+       | grep acl`
+echo $THEACE
+
+#Grab the identity of the Security Group
+THESGR=`aws cloudformation describe-stack-resources --stack-name ${1:-TestStack}SecurityGroup --region eu-west-2 \
+       | jq .[][][] \
+       | grep sg`
+echo $THESGR
 
 #create routes
 aws cloudformation create-stack  \
@@ -109,8 +100,6 @@ aws cloudformation create-stack  \
     ParameterKey=myInternetGateway,ParameterValue=${THEIGW}  \
     ParameterKey=myRouteTable,ParameterValue=${THERTB}  \
   --region eu-west-2
-
-echo
 describe_stacks ${1:-TestStack}
 
 #create and attach subnets
@@ -122,6 +111,17 @@ aws cloudformation create-stack  \
     ParameterKey=myNetworkAcl,ParameterValue=${THEACL}  \
   --region eu-west-2
 describe_stacks ${1:-TestStack}
+
+#create security group rules
+aws cloudformation create-stack  \
+  --template-body file://./vpc_gress.json  \
+  --stack-name ${1:-TestStack}SecurityGroupRules  \
+  --parameters  \
+    ParameterKey=mySecurityGroup,ParameterValue=${THESGR}  \
+  --region eu-west-2
+describe_stacks ${1:-TestStack}
+
+aws cloudformation wait stack-create-complete --stack-name ${1:-TestStack}SecurityGroupRules --region eu-west-2
 aws cloudformation wait stack-create-complete --stack-name ${1:-TestStack}Subnets --region eu-west-2
 
 # list the subnets for a flare
