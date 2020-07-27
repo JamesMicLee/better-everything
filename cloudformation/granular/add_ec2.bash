@@ -18,12 +18,6 @@ THEVPC=`echo $JSON_PAY  \
        | jq --sort-keys '.[][]|select(.ResourceType == "AWS::EC2::VPC")|.PhysicalResourceId'  `
 echo $THEVPC
 
-#Grab the identity of the ACL
-JSON_PAY=`aws ec2 describe-network-acls --region eu-west-2`
-THEACL=`echo $JSON_PAY  \
-      | jq --sort-keys '.[][]|select(.VpcId == '$THEVPC')|.NetworkAclId'  `
-echo $THEACL
-
 #Grab the identity of the Security Group
 JSON_PAY=`aws ec2 describe-security-groups --region eu-west-2  `
 THESG=`echo $JSON_PAY | jq --sort-keys '.[][]|select(.VpcId == '${THEVPC}')|.GroupId,.GroupName' | paste - -| grep -v '"default"'\$ | awk '{ print $1 } '  `
