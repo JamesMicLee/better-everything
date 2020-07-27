@@ -86,9 +86,8 @@ THEACE=`aws cloudformation describe-stack-resources --stack-name ${1:-TestStack}
 echo $THEACE
 
 #Grab the identity of the Security Group
-THESGR=`aws cloudformation describe-stack-resources --stack-name ${1:-TestStack}SecurityGroup --region eu-west-2 \
-       | jq .[][][] \
-       | grep sg`
+JSON_PAY=`aws ec2 describe-security-groups --region eu-west-2  `
+THESGR=`echo $JSON_PAY | jq --sort-keys '.[][]|select(.VpcId == '${THEVPC}')|.GroupId,.GroupName' | paste - -| grep -v '"default"'\$ | awk '{ print $1 } '  `
 echo $THESGR
 
 #create routes
