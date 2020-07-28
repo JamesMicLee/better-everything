@@ -51,7 +51,6 @@ aws cloudformation create-stack  \
     ParameterKey=myVpcName,ParameterValue=${THEVPC}  \
     ParameterKey=myNetworkAcl,ParameterValue=${THEACL}  \
   --region eu-west-2
-describe_stacks ${1:-TestStack}
 
 #create a security group
 aws cloudformation create-stack  \
@@ -60,7 +59,6 @@ aws cloudformation create-stack  \
   --parameters  \
     ParameterKey=myVpcName,ParameterValue=${THEVPC}  \
   --region eu-west-2
-describe_stacks ${1:-TestStack}
 
 #create and attach an internet gateway
 aws cloudformation create-stack  \
@@ -99,7 +97,6 @@ aws cloudformation create-stack  \
     ParameterKey=myInternetGateway,ParameterValue=${THEIGW}  \
     ParameterKey=myRouteTable,ParameterValue=${THERTB}  \
   --region eu-west-2
-describe_stacks ${1:-TestStack}
 
 #create and attach subnets
 aws cloudformation create-stack  \
@@ -109,7 +106,6 @@ aws cloudformation create-stack  \
     ParameterKey=myVpcName,ParameterValue=${THEVPC}  \
     ParameterKey=myNetworkAcl,ParameterValue=${THEACL}  \
   --region eu-west-2
-describe_stacks ${1:-TestStack}
 
 #create security group rules
 aws cloudformation create-stack  \
