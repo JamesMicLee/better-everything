@@ -3,37 +3,37 @@
   "Description": "A template to add subnets.",
   "Outputs": {
     "Subnet1Lambda": {
-      "Description": "The name of a subnet",
+      "Description": "Lambda Subnet #1.",
       "Value": {
         "Ref": "mySubnetlaa"
       }
     },
     "Subnet2Lambda": {
-      "Description": "The name of a subnet",
+      "Description": "Lambda Subnet #2.",
       "Value": {
         "Ref": "mySubnetlab"
       }
     },
     "Subnet3Lambda": {
-      "Description": "The name of a subnet",
+      "Description": "Lambda Subnet #3.",
       "Value": {
         "Ref": "mySubnetlac"
       }
     },
     "Subnet4Ec2": {
-      "Description": "The name of a subnet",
+      "Description": "EC2 Subnet #1.",
       "Value": {
         "Ref": "mySubnetec2a"
       }
     },
     "Subnet5Ec2": {
-      "Description": "The name of a subnet",
+      "Description": "EC2 Subnet #2.",
       "Value": {
         "Ref": "mySubnetec2b"
       }
     },
     "Subnet6Ec2": {
-      "Description": "The name of a subnet",
+      "Description": "EC2 Subnet #3.",
       "Value": {
         "Ref": "mySubnetec2c"
       }
