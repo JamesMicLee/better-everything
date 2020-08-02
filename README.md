@@ -1,9 +1,7 @@
 # better-everything
 Snippets for AWS
 
-- Python lambda to shutdown EC2
-- IAM policy as json
-- circleci config for testing json and pep8
-- Cloudformation templates for deploying a VPC
+- Lambda to shutdown EC2 (Python 3)
+- Cloudformation templates (JSON) for deploying a VPC (Bash scripts: Amazon Linux 2)
 
-The json and pep8 tests run on every commit. The test looks for any .json or .py files in the repository, in any branch. 
+Note: JSON and pep8 tests run on every commit to this repo, in any branch. 
